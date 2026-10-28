@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chat Intro</title>
+<link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#fff;--me:#1d9bf0;--them:#eef3f8;--text:#111;--page:#0b0f14}
+html,body{height:100%;margin:0;background:var(--page);font-family:'Itim','Noto Sans Thai',system-ui,sans-serif}
+body{display:flex;align-items:center;justify-content:center}
+#stage{position:relative;height:min(100%,calc(100vw*16/9));aspect-ratio:9/16;background:var(--bg);overflow:hidden;display:flex;flex-direction:column;max-width:100%}
+#chat{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:12px;padding:5% 5% 3%;overflow:hidden;container-type:inline-size}
+.row{display:flex;opacity:0;transform:translateY(14px) scale(.96);transition:.25s}
+.row.show{opacity:1;transform:none}
+.row.me{justify-content:flex-end}
+.b{position:relative;max-width:76%;padding:.7em 1.1em;border-radius:1.6em;font-size:clamp(15px,5cqw,34px);line-height:1.35;color:var(--text);background:var(--them)}
+.me .b{background:linear-gradient(180deg,#34b0ff,#1d8bf0);color:#fff}
+.dots{display:flex;gap:.3em;padding:.9em 1.1em}
+.dots i{width:.55em;height:.55em;border-radius:50%;background:#9aa7b4;animation:d 1s infinite}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes d{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-.35em);opacity:1}}
+#status{display:flex;justify-content:space-between;align-items:center;padding:3% 7% 0;font-weight:600;font-size:clamp(13px,3.8vw,22px);color:#111}
+.ic{display:flex;gap:.45em;align-items:center}
+.rx{position:absolute;right:-.3em;bottom:-.9em;background:#fff;border-radius:50%;width:1.7em;height:1.7em;display:flex;align-items:center;justify-content:center;font-size:.8em;box-shadow:0 1px 5px rgba(0,0,0,.25);animation:rp .35s cubic-bezier(.3,1.8,.5,1)}
+@keyframes rp{from{transform:scale(0)}to{transform:scale(1)}}
+.read{opacity:0;transition:.3s;font-size:clamp(11px,3vw,18px);color:#8a97a5;margin:-6px 0 0 4%}
+.read.show{opacity:1}
+#bar{margin:0 5% 5%;border:1.5px solid #dbe3ea;border-radius:2em;padding:.8em 1.2em;color:#9aa7b4;font-size:clamp(13px,3.6vw,24px)}
+#cut{position:absolute;inset:0;background:#000;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6em;text-align:center;padding:8%;opacity:0;pointer-events:none;transition:opacity 1.4s ease-in;font-size:clamp(16px,4.5vw,32px)}
+#cut.show{opacity:1}
+#cut>*{display:none}
+#play{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.92)}
+button{font:inherit;background:var(--me);color:#fff;border:0;border-radius:2em;padding:.8em 1.8em;font-size:18px;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="status"><span>9:41</span><span class="ic"><svg width="1.3em" height="1em" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx=".8"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8"/><rect x="10" y="3" width="3" height="9" rx=".8"/><rect x="15" y="0" width="3" height="12" rx=".8"/></svg><svg width="1.2em" height="1em" viewBox="0 0 16 12" fill="currentColor"><path d="M8 11.2l1.8-1.9a2.6 2.6 0 0 0-3.6 0zM3.7 6.8a6.1 6.1 0 0 1 8.6 0l-1.3 1.4a4.2 4.2 0 0 0-6 0zM1 4A9.9 9.9 0 0 1 15 4l-1.3 1.4a8 8 0 0 0-11.4 0z"/></svg><svg width="1.9em" height="1em" viewBox="0 0 28 12" fill="currentColor"><rect x=".5" y=".5" width="23" height="11" rx="3" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="20" height="8" rx="1.8"/><rect x="25" y="4" width="2" height="4" rx="1" opacity=".4"/></svg></span></div>
+  <div id="chat"></div>
+  <div id="bar">ส่งข้อความ...</div>
+  <div id="cut"><b>🎬</b><span>ตัดเข้าคลิปหลัก</span><span style="opacity:.8">“ใครที่กำลังมองหาสาขาที่เรียนแล้วสามารถนำไปใช้งานได้จริง...”</span></div>
+  <div id="play"><button id="go">▶ เล่น</button></div>
+</div>
+<script>
+const msgs=[
+ ["them","แกเรียนจบไปจะเรียนต่อไรดี"],
+ ["them","อยากได้สาขาที่จบมาแล้วมีงานทำชัวร์ๆ อะ 😭"],
+ ["me","มา บัญชี อาชีวะชุมพรดิแก!"],
+ ["me","ตอบโจทย์สุด"],
+ ["them","ห้ะ?"],
+ ["them","บัญชีเนี่ยนะ"],
+ ["them","มันดียังไงอะ?"]
+];
+const chat=document.getElementById('chat'),cut=document.getElementById('cut'),play=document.getElementById('play');
+let ac,run=0;
+function pop(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(900,ac.currentTime);o.frequency.exponentialRampToValueAtTime(500,ac.currentTime+.1);g.gain.setValueAtTime(.15,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.15);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+.16)}catch(e){}}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const bar=document.getElementById('bar'),PH='ส่งข้อความ...';
+function click(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.setValueAtTime(1350,ac.currentTime);o.frequency.exponentialRampToValueAtTime(800,ac.currentTime+.03);g.gain.setValueAtTime(.001,ac.currentTime);g.gain.linearRampToValueAtTime(.16,ac.currentTime+.003);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.05);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+.06)}catch(e){}}
+async function typeIn(text,show){const ch=[...text];if(show){bar.style.color='#111';bar.textContent=''}for(const c of ch){if(show)bar.textContent+=c;click();await wait(75+Math.random()*60)}await wait(250)}
+function add(side,html,cls=''){const r=document.createElement('div');r.className='row '+side;r.innerHTML='<div class="b '+cls+'">'+html+'</div>';chat.appendChild(r);requestAnimationFrame(()=>r.classList.add('show'));return r}
+async function start(){
+  const id=++run;chat.innerHTML='';cut.classList.remove('show');play.style.display='none';
+  await wait(500);
+  for(const [side,t] of msgs){
+    if(id!==run)return;
+    let row;
+    if(side==='me'){await typeIn(t,true);bar.textContent=PH;bar.style.color='';row=add(side,t);pop()}
+    else{const dots=add(side,'<i></i><i></i><i></i>','dots');await typeIn(t,false);dots.remove();row=add(side,t);pop()}
+    if(t==='บัญชีเนี่ยนะ'){await wait(500);row.style.marginBottom='14px';const x=document.createElement('span');x.className='rx';x.textContent='❤️';row.firstChild.appendChild(x);pop()}
+    await wait(450);
+  }
+  await wait(300);const rd=document.createElement('div');rd.className='read';rd.textContent='อ่านแล้ว';chat.appendChild(rd);requestAnimationFrame(()=>rd.classList.add('show'));
+  await wait(900);cut.classList.add('show');await wait(2500);
+  play.style.display='flex';document.getElementById('go').textContent='↻ เล่นอีกครั้ง';
+}
+document.getElementById('go').onclick=start;
+</script>
+</body>
+</html>
